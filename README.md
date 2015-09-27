@@ -8,6 +8,10 @@ I couldn't find the original repository to fork so created a new one to probably
 Figured other folks would like to have a second source for the code or may have good ideas but no coding experience, or just would love to contribute. 
 
 ### Notes :
+ 
+ * I use this script on Live 9.1 so not sure about its compatibility with other versions but I believe it's supposed to support as early as 8.
+
+ * I'm trying to set up a default Ableton track with some effects already dropped in the default MIDI and Audio tracks. So some [future] features might not be portable to all settings. 
 
  * I disabled most of the scene control and highlighting stuff because I found it a bit far-fetched for that foot print to control your clips but more importantly because I own a Launchpad so I didn't need it
 
