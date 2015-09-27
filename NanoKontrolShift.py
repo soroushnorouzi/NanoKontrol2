@@ -65,12 +65,12 @@ class NanoKontrolShift(ControlSurface):
             # SET INITIAL SESSION/MIXER AND MODIFIERS BUTTONS
             self._set_modifiers_buttons()
             self.__update_matrix()
-            self.set_highlighting_session_component(self.session)
+            # self.set_highlighting_session_component(self.session)
 
             for component in self.components:
                 component.set_enabled(True)
 
-        self._suppress_session_highlight = True
+        # self._suppress_session_highlight = True
         self._suppress_send_midi = True # Turn rebuild back on, once we're done setting up
 
     def _setup_session_control(self):
@@ -79,8 +79,8 @@ class NanoKontrolShift(ControlSurface):
         # CREATE SESSION, SET OFFSETS, BUTTONS NAVIGATION AND BUTTON MATRIX
         self.session = SessionComponent(num_tracks, num_scenes) #(num_tracks, num_scenes)
         self.session.set_offsets(0, 0)
-        self.session.set_scene_bank_buttons(ButtonElement(is_momentary, MIDI_CC_TYPE, CHANNEL, session_down), ButtonElement(is_momentary, MIDI_CC_TYPE, CHANNEL, session_up))
-        self.session.set_track_bank_buttons(ButtonElement(is_momentary, MIDI_CC_TYPE, CHANNEL, session_right), ButtonElement(is_momentary, MIDI_CC_TYPE, CHANNEL, session_left)) # (right_button, left_button) This moves the "red box" selection set left & right. We'll use the mixer track selection instead...
+        # self.session.set_scene_bank_buttons(ButtonElement(is_momentary, MIDI_CC_TYPE, CHANNEL, session_down), ButtonElement(is_momentary, MIDI_CC_TYPE, CHANNEL, session_up))
+        # self.session.set_track_bank_buttons(ButtonElement(is_momentary, MIDI_CC_TYPE, CHANNEL, session_right), ButtonElement(is_momentary, MIDI_CC_TYPE, CHANNEL, session_left)) # (right_button, left_button) This moves the "red box" selection set left & right. We'll use the mixer track selection instead...
 
     def _setup_mixer_control(self):
         is_momentary = True
@@ -132,6 +132,7 @@ class NanoKontrolShift(ControlSurface):
                                 value_to_send = clip_slot._triggered_to_record_value
                             else:
                                 value_to_send = clip_slot._triggered_to_play_value
+                        '''
                         elif clip_slot._clip_slot.clip.is_playing:
                             if clip_slot._clip_slot.clip.is_recording:
                                 value_to_send = 127
@@ -147,6 +148,7 @@ class NanoKontrolShift(ControlSurface):
                                         button.send_value(127)
                                     else:
                                         button.send_value(0)
+                        '''
                     elif clip_slot._clip_slot.is_triggered:
                         if clip_slot._clip_slot.will_record_on_start:
                             value_to_send = clip_slot._triggered_to_record_value
@@ -159,12 +161,12 @@ class NanoKontrolShift(ControlSurface):
                             value_to_send = clip_slot._started_value
                     elif clip_slot._clip_slot.controls_other_clips:
                         value_to_send = 0
+                '''
                 if value_to_send in range(128):
                     button.send_value(value_to_send)
                 else:
                     button.turn_off()
-
-
+                '''
 
     """                                 MODIFIERS, MODES, KEYS CONFIG                                             """
 
@@ -221,11 +223,8 @@ class NanoKontrolShift(ControlSurface):
 
         self.log_message("Controls Cleared")
 
-
-
-    def _set_initial_mode(self):
+    def _set_normal_mode(self):
         is_momentary = True
-        ### MIXER
         self.mixer._set_send_nav(ButtonElement(is_momentary, MIDI_CC_TYPE, CHANNEL, send_up), ButtonElement(is_momentary, MIDI_CC_TYPE, CHANNEL, send_down))
         for index in range(num_tracks):
             strip = self.mixer.channel_strip(index)
@@ -235,32 +234,6 @@ class NanoKontrolShift(ControlSurface):
             self.mixer.send_controls[self.mixer.sends_index] = EncoderElement(MIDI_CC_TYPE, CHANNEL, mixer_sendknob_cc[index], Live.MidiMap.MapMode.absolute)
             strip.set_send_controls(tuple(self.mixer.send_controls))
             strip._invert_mute_feedback = True
-        ### SESSION - CLIP LAUNCH BUTTONS
-        launch_ctrl = 0
-        for scene_index in range(num_scenes):
-            scene = self.session.scene(scene_index)
-            scene.name = 'Scene_' + str(scene_index)
-            button_row = []
-            scene.set_triggered_value(2)
-            for track_index in range(num_tracks):
-                button = ButtonElement(is_momentary, MIDI_CC_TYPE, CHANNEL, session_cliplaunch_cc[launch_ctrl])
-                button_row.append(button)
-                launch_ctrl = launch_ctrl + 1
-                button.name = str(track_index) + '_Clip_' + str(scene_index) + '_Button'
-                button_row.append(button)
-                clip_slot = scene.clip_slot(track_index)
-                clip_slot.name = str(track_index) + '_Clip_Slot_' + str(scene_index)
-                clip_slot.set_launch_button(button)
-        self.session.selected_scene().name = 'Selected_Scene'
-        if not self.session.offset_has_listener(self.__update_matrix):
-            self.session.add_offset_listener(self.__update_matrix)
-        self.__update_matrix()
-        self.mixer._update_send_index(self.mixer.sends_index)
-
-
-    def _set_shift_mode(self):
-        is_momentary = True
-        self.mixer._set_send_nav(ButtonElement(is_momentary, MIDI_CC_TYPE, CHANNEL, send_up), ButtonElement(is_momentary, MIDI_CC_TYPE, CHANNEL, send_down))
         ### SET ARM, SOLO, MUTE
         for index in range(num_tracks):
             strip = self.mixer.channel_strip(index)
@@ -268,6 +241,7 @@ class NanoKontrolShift(ControlSurface):
             strip.set_solo_button(ButtonElement(is_momentary, MIDI_CC_TYPE, CHANNEL, track_solo_cc[index]))
             strip.set_mute_button(ButtonElement(is_momentary, MIDI_CC_TYPE, CHANNEL, track_mute_cc[index]))
             strip.set_arm_button(ButtonElement(is_momentary, MIDI_CC_TYPE, CHANNEL, track_arm_cc[index]))
+            # self.transport.set_stop_button(ButtonElement(is_momentary, MIDI_CC_TYPE, CHANNEL, transport_stop_cc))
             for i in range(12):
                 self.mixer.send_controls.append(None)
             self.mixer.send_controls[self.mixer.sends_index] = EncoderElement(MIDI_CC_TYPE, CHANNEL, mixer_sendknob_cc[index], Live.MidiMap.MapMode.absolute)
@@ -319,9 +293,9 @@ class NanoKontrolShift(ControlSurface):
         self.device.set_on_off_button(onoff_control)
         self.device.set_lock_button(setlock_control)
         # TRANSPORT
-        self.transport.set_stop_button(ButtonElement(is_momentary, MIDI_CC_TYPE, CHANNEL, transport_stop_cc))
-        self.transport.set_play_button(ButtonElement(not is_momentary, MIDI_CC_TYPE, CHANNEL, transport_play_cc))
-        self.transport.set_record_button(ButtonElement(is_momentary, MIDI_CC_TYPE, CHANNEL, transport_record_cc))
+        # self.transport.set_stop_button(ButtonElement(is_momentary, MIDI_CC_TYPE, CHANNEL, transport_stop_cc))
+        # self.transport.set_play_button(ButtonElement(not is_momentary, MIDI_CC_TYPE, CHANNEL, transport_play_cc))
+        # self.transport.set_record_button(ButtonElement(is_momentary, MIDI_CC_TYPE, CHANNEL, transport_record_cc))
         self.transport._set_quant_toggle_button(ButtonElement(is_momentary, MIDI_CC_TYPE, CHANNEL, transport_quantization_cc))
         self.transport.set_metronome_button(ButtonElement(not is_momentary, MIDI_CC_TYPE, CHANNEL, transport_metronome_cc))
         self.transport._set_tempo_buttons(ButtonElement(is_momentary, MIDI_CC_TYPE, CHANNEL, transport_tempodown_cc), ButtonElement(is_momentary, MIDI_CC_TYPE, CHANNEL, transport_tempoup_cc))
@@ -355,10 +329,7 @@ class NanoKontrolShift(ControlSurface):
             if self._shift_button_pressed is False:
                 self._unpress_modes()
                 self._shift_button_pressed = True
-                self._manage_modes(1)
-            elif self._shift_button_pressed is True:
                 self._manage_modes(0)
-                self._unpress_modes()
 
     def _alt_value(self, value):
         assert isinstance(value, int)
@@ -368,9 +339,6 @@ class NanoKontrolShift(ControlSurface):
                 self._unpress_modes()
                 self._alt_button_pressed = True
                 self._manage_modes(2)
-            elif self._alt_button_pressed is True:
-                self._manage_modes(0)
-                self._unpress_modes()
 
     def _ctrl_value(self, value):
         assert isinstance(value, int)
@@ -380,25 +348,15 @@ class NanoKontrolShift(ControlSurface):
                 self._unpress_modes()
                 self._ctrl_button_pressed = True
                 self._manage_modes(3)
-            elif self._ctrl_button_pressed is True:
-                self._manage_modes(0)
-                self._unpress_modes()
 
     def _manage_modes(self, mode_index):
         if mode_index == 0:
             self._clear_controls()
-            self._set_initial_mode()
-            self._shift_button.turn_on()
+            self._set_normal_mode()
+            # self._shift_button.turn_on()
             self._alt_button.turn_on()
             self._ctrl_button.turn_on()
             self.log_message("NORMAL ON")
-        elif mode_index == 1:
-            self._clear_controls()
-            self._set_shift_mode()
-            self._shift_button.turn_on()
-            self._alt_button.turn_off()
-            self._ctrl_button.turn_off()
-            self.log_message("SHIFT ON")
         elif mode_index == 2:
             self._clear_controls()
             self._set_alt_mode()
