@@ -1,5 +1,5 @@
-h2. Hey there!
-h1. NanoKontrol2 Ableton Live Remote Script
+## Hey there!
+# NanoKontrol2 Ableton Live Remote Script
 
 This script is stripped down version of the code found in [this Ableton forum article](https://forum.ableton.com/viewtopic.php?f=1&t=193316)
 
