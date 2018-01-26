@@ -1,25 +1,30 @@
 from __future__ import with_statement
 import Live
-import time # We will be using time functions for time-stamping our log file outputs
+import time  # We will be using time functions for time-stamping our log file outputs
 
 """ We are only using using some of the Framework classes them in this script (the rest are not listed here) """
 
 from consts import *
-from _Framework.ButtonElement import ButtonElement # Class representing a button a the controller
-from _Framework.ButtonMatrixElement import ButtonMatrixElement # Class representing a button a the controller
-from _Framework.ChannelStripComponent import * # Class attaching to the mixer of a given track
+from _Framework.ButtonElement import ButtonElement  # Class representing a button a the controller
+from _Framework.ButtonMatrixElement import ButtonMatrixElement  # Class representing a button a the controller
+from _Framework.ChannelStripComponent import *  # Class attaching to the mixer of a given track
 from _Framework.EncoderElement import EncoderElement
-from _Framework.ClipSlotComponent import ClipSlotComponent # Class representing a ClipSlot within Live
-from _Framework.CompoundComponent import CompoundComponent # Base class for classes encompasing other components to form complex components
-from _Framework.ControlElement import ControlElement # Base class for all classes representing control elements on a controller
-from _Framework.ControlSurface import ControlSurface # Central base class for scripts based on the new Framework
-from _Framework.ControlSurfaceComponent import ControlSurfaceComponent # Base class for all classes encapsulating functions in Live
-from _Framework.InputControlElement import * # Base class for all classes representing control elements on a controller
-from _Framework.MixerComponent import MixerComponent # Class encompassing several channel strips to form a mixer
-from _Framework.SceneComponent import SceneComponent # Class representing a scene in Live
-from _Framework.SessionComponent import SessionComponent # Class encompassing several scene to cover a defined section of Live's session
-from _Framework.SliderElement import SliderElement # Class representing a slider on the controller
-from _Framework.TransportComponent import TransportComponent # Class encapsulating all functions in Live's transport section
+from _Framework.ClipSlotComponent import ClipSlotComponent  # Class representing a ClipSlot within Live
+from _Framework.CompoundComponent import \
+    CompoundComponent  # Base class for classes encompasing other components to form complex components
+from _Framework.ControlElement import \
+    ControlElement  # Base class for all classes representing control elements on a controller
+from _Framework.ControlSurface import ControlSurface  # Central base class for scripts based on the new Framework
+from _Framework.ControlSurfaceComponent import \
+    ControlSurfaceComponent  # Base class for all classes encapsulating functions in Live
+from _Framework.InputControlElement import *  # Base class for all classes representing control elements on a controller
+from _Framework.MixerComponent import MixerComponent  # Class encompassing several channel strips to form a mixer
+from _Framework.SceneComponent import SceneComponent  # Class representing a scene in Live
+from _Framework.SessionComponent import \
+    SessionComponent  # Class encompassing several scene to cover a defined section of Live's session
+from _Framework.SliderElement import SliderElement  # Class representing a slider on the controller
+from _Framework.TransportComponent import \
+    TransportComponent  # Class encapsulating all functions in Live's transport section
 from _Framework.DeviceComponent import DeviceComponent
 
 # SpecialMixerComponent and SpecialChannelStripComponent to get acess to the unfold function
@@ -39,14 +44,15 @@ class NanoKontrolShift(ControlSurface):
         ControlSurface.__init__(self, c_instance)
         self._suppress_session_highlight = True
         self._suppress_send_midi = True  # Turn off rebuild MIDI map until after we're done setting up
-        self.log_message(time.strftime("%d.%m.%Y %H:%M:%S", time.localtime()) + "--------------= NanoKontrolShift log opened =--------------") # Writes message into Live's main log file. This is a ControlSurface method.
+        self.log_message(time.strftime("%d.%m.%Y %H:%M:%S",
+                                       time.localtime()) + "--------------= NanoKontrolShift log opened =--------------")  # Writes message into Live's main log file. This is a ControlSurface method.
         with self.component_guard():
             # OBJECTS
-            self.session = None #session object
-            self.mixer = None #mixer object
-            self.view = None #clip/device view object
-            self.device = None #device object
-            self.transport = None #transport object
+            self.session = None  # session object
+            self.mixer = None  # mixer object
+            self.view = None  # clip/device view object
+            self.device = None  # device object
+            self.transport = None  # transport object
             # MODES
             self._shift_button = None
             self._shift_button_pressed = False
@@ -56,12 +62,12 @@ class NanoKontrolShift(ControlSurface):
             self._ctrl_button_pressed = False
             # INITIALIZE MIXER, SESSIONS
             self._setup_session_control()  # Setup the session object
-            self._setup_mixer_control() # Setup the mixer object
-            self._setup_view_control() # Setup the clip/view toggler
-            self.session.set_mixer(self.mixer) # Bind mixer to session
-            self._setup_device_control() # Setup the device object
-            self._setup_transport_control() # Setup transport object
-            self.set_device_component(self.device) # Bind device to control surface
+            self._setup_mixer_control()  # Setup the mixer object
+            self._setup_view_control()  # Setup the clip/view toggler
+            self.session.set_mixer(self.mixer)  # Bind mixer to session
+            self._setup_device_control()  # Setup the device object
+            self._setup_transport_control()  # Setup transport object
+            self.set_device_component(self.device)  # Bind device to control surface
             # SET INITIAL SESSION/MIXER AND MODIFIERS BUTTONS
             self._set_modifiers_buttons()
             self.__update_matrix()
@@ -71,23 +77,25 @@ class NanoKontrolShift(ControlSurface):
                 component.set_enabled(True)
 
         # self._suppress_session_highlight = True
-        self._suppress_send_midi = True # Turn rebuild back on, once we're done setting up
+        self._suppress_send_midi = True  # Turn rebuild back on, once we're done setting up
 
     def _setup_session_control(self):
         self.show_message("#################### SESSION: ON ##############################")
         is_momentary = True
         # CREATE SESSION, SET OFFSETS, BUTTONS NAVIGATION AND BUTTON MATRIX
-        self.session = SessionComponent(num_tracks, num_scenes) #(num_tracks, num_scenes)
+        self.session = SessionComponent(num_tracks, num_scenes)  # (num_tracks, num_scenes)
         self.session.set_offsets(0, 0)
         # self.session.set_scene_bank_buttons(ButtonElement(is_momentary, MIDI_CC_TYPE, CHANNEL, session_down), ButtonElement(is_momentary, MIDI_CC_TYPE, CHANNEL, session_up))
-        # self.session.set_track_bank_buttons(ButtonElement(is_momentary, MIDI_CC_TYPE, CHANNEL, session_right), ButtonElement(is_momentary, MIDI_CC_TYPE, CHANNEL, session_left)) # (right_button, left_button) This moves the "red box" selection set left & right. We'll use the mixer track selection instead...
+        self.session.set_track_bank_buttons(ButtonElement(is_momentary, MIDI_CC_TYPE, CHANNEL, session_right),
+                                            ButtonElement(is_momentary, MIDI_CC_TYPE, CHANNEL,
+                                                          session_left))  # (right_button, left_button) This moves the "red box" selection set left & right. We'll use the mixer track selection instead...
 
     def _setup_mixer_control(self):
         is_momentary = True
-        #CREATE MIXER, SET OFFSET (SPECIALMIXERCOMPONENT USES SPECIALCHANNELSTRIP THAT ALLOWS US TO UNFOLD TRACKS WITH TRACK SELECT BUTTON)
-        self.mixer = SpecialMixerComponent(num_tracks, 0, False, False) # 4 tracks, 2 returns, no EQ, no filters
+        # CREATE MIXER, SET OFFSET (SPECIALMIXERCOMPONENT USES SPECIALCHANNELSTRIP THAT ALLOWS US TO UNFOLD TRACKS WITH TRACK SELECT BUTTON)
+        self.mixer = SpecialMixerComponent(num_tracks, 0, False, False)  # 4 tracks, 2 returns, no EQ, no filters
         self.mixer.name = 'Mixer'
-        self.mixer.set_track_offset(0) #Sets start point for mixer strip (offset from left)
+        self.mixer.set_track_offset(0)  # Sets start point for mixer strip (offset from left)
 
     def _setup_view_control(self):
         # CREATES OBJECT SO WE CAN TOGGLE DEVICE/CLIP, LOCK DEVICE
@@ -101,7 +109,6 @@ class NanoKontrolShift(ControlSurface):
     def _setup_transport_control(self):
         # CREATE TRANSPORT DEVICE
         self.transport = SpecialTransportComponent(self)
-
 
     def _on_selected_scene_changed(self):
         # ALLOWS TO GRAB THE FIRST DEVICE OF A SELECTED TRACK IF THERE'S ANY
@@ -170,7 +177,7 @@ class NanoKontrolShift(ControlSurface):
 
     """                                 MODIFIERS, MODES, KEYS CONFIG                                             """
 
-    #MODES ARE HERE: INITIALIZATIONS, DISCONNECTS BUTTONS, SLIDERS, ENCODERS
+    # MODES ARE HERE: INITIALIZATIONS, DISCONNECTS BUTTONS, SLIDERS, ENCODERS
     def _clear_controls(self):
         # TURNING OFF ALL LEDS IN MATRIX
         self._turn_off_matrix()
@@ -185,7 +192,7 @@ class NanoKontrolShift(ControlSurface):
                 clip_slot.set_launch_button(None)
         self.session.set_stop_track_clip_buttons(None)
         self.session.set_stop_all_clips_button(None)
-            # REMOVE LISTENER TO SESSION MOVES
+        # REMOVE LISTENER TO SESSION MOVES
         if self.session.offset_has_listener(self.__update_matrix):
             self.session.remove_offset_listener(self.__update_matrix)
         self.session.set_stop_all_clips_button(None)
@@ -225,13 +232,16 @@ class NanoKontrolShift(ControlSurface):
 
     def _set_normal_mode(self):
         is_momentary = True
-        self.mixer._set_send_nav(ButtonElement(is_momentary, MIDI_CC_TYPE, CHANNEL, send_up), ButtonElement(is_momentary, MIDI_CC_TYPE, CHANNEL, send_down))
+        self.mixer._set_send_nav(ButtonElement(is_momentary, MIDI_CC_TYPE, CHANNEL, send_up),
+                                 ButtonElement(is_momentary, MIDI_CC_TYPE, CHANNEL, send_down))
         for index in range(num_tracks):
             strip = self.mixer.channel_strip(index)
             strip.name = 'Mixer_ChannelStrip_' + str(index)
             self.mixer._update_send_index(self.mixer.sends_index)
             strip.set_volume_control(SliderElement(MIDI_CC_TYPE, CHANNEL, mixer_volumefader_cc[index]))
-            self.mixer.send_controls[self.mixer.sends_index] = EncoderElement(MIDI_CC_TYPE, CHANNEL, mixer_sendknob_cc[index], Live.MidiMap.MapMode.absolute)
+            self.mixer.send_controls[self.mixer.sends_index] = EncoderElement(MIDI_CC_TYPE, CHANNEL,
+                                                                              mixer_sendknob_cc[index],
+                                                                              Live.MidiMap.MapMode.absolute)
             strip.set_send_controls(tuple(self.mixer.send_controls))
             strip._invert_mute_feedback = True
         ### SET ARM, SOLO, MUTE
@@ -244,15 +254,17 @@ class NanoKontrolShift(ControlSurface):
             # self.transport.set_stop_button(ButtonElement(is_momentary, MIDI_CC_TYPE, CHANNEL, transport_stop_cc))
             for i in range(12):
                 self.mixer.send_controls.append(None)
-            self.mixer.send_controls[self.mixer.sends_index] = EncoderElement(MIDI_CC_TYPE, CHANNEL, mixer_sendknob_cc[index], Live.MidiMap.MapMode.absolute)
+            self.mixer.send_controls[self.mixer.sends_index] = EncoderElement(MIDI_CC_TYPE, CHANNEL,
+                                                                              mixer_sendknob_cc[index],
+                                                                              Live.MidiMap.MapMode.absolute)
             strip.set_send_controls(tuple(self.mixer.send_controls))
             strip._invert_mute_feedback = True
         self.mixer._update_send_index(self.mixer.sends_index)
 
-
     def _set_alt_mode(self):
         is_momentary = True
-        self.mixer._set_send_nav(ButtonElement(is_momentary, MIDI_CC_TYPE, CHANNEL, send_up), ButtonElement(is_momentary, MIDI_CC_TYPE, CHANNEL, send_down))
+        self.mixer._set_send_nav(ButtonElement(is_momentary, MIDI_CC_TYPE, CHANNEL, send_up),
+                                 ButtonElement(is_momentary, MIDI_CC_TYPE, CHANNEL, send_down))
         stop_track_controls = []
         resetsend_controls = []
         button = None
@@ -269,11 +281,11 @@ class NanoKontrolShift(ControlSurface):
         self.mixer.set_resetsend_buttons(tuple(resetsend_controls))
         self.mixer._update_send_index(self.mixer.sends_index)
 
-
     def _set_ctrl_mode(self):
         # CLIP/DEVICE VIEW TOGGLE
         is_momentary = True
-        self.view.set_device_nav_buttons(ButtonElement(is_momentary, MIDI_CC_TYPE, CHANNEL, device_left_cc), ButtonElement(is_momentary, MIDI_CC_TYPE, CHANNEL, device_right_cc))
+        self.view.set_device_nav_buttons(ButtonElement(is_momentary, MIDI_CC_TYPE, CHANNEL, device_left_cc),
+                                         ButtonElement(is_momentary, MIDI_CC_TYPE, CHANNEL, device_right_cc))
         button = None
         detailclip_view_controls = []
         for index in range(num_tracks):
@@ -296,13 +308,17 @@ class NanoKontrolShift(ControlSurface):
         # self.transport.set_stop_button(ButtonElement(is_momentary, MIDI_CC_TYPE, CHANNEL, transport_stop_cc))
         # self.transport.set_play_button(ButtonElement(not is_momentary, MIDI_CC_TYPE, CHANNEL, transport_play_cc))
         # self.transport.set_record_button(ButtonElement(is_momentary, MIDI_CC_TYPE, CHANNEL, transport_record_cc))
-        self.transport._set_quant_toggle_button(ButtonElement(is_momentary, MIDI_CC_TYPE, CHANNEL, transport_quantization_cc))
-        self.transport.set_metronome_button(ButtonElement(not is_momentary, MIDI_CC_TYPE, CHANNEL, transport_metronome_cc))
-        self.transport._set_tempo_buttons(ButtonElement(is_momentary, MIDI_CC_TYPE, CHANNEL, transport_tempodown_cc), ButtonElement(is_momentary, MIDI_CC_TYPE, CHANNEL, transport_tempoup_cc))
+        self.transport._set_quant_toggle_button(
+            ButtonElement(is_momentary, MIDI_CC_TYPE, CHANNEL, transport_quantization_cc))
+        self.transport.set_metronome_button(
+            ButtonElement(not is_momentary, MIDI_CC_TYPE, CHANNEL, transport_metronome_cc))
+        self.transport._set_tempo_buttons(ButtonElement(is_momentary, MIDI_CC_TYPE, CHANNEL, transport_tempodown_cc),
+                                          ButtonElement(is_momentary, MIDI_CC_TYPE, CHANNEL, transport_tempoup_cc))
         # SESSION STOP ALL CLIPS AND SCENE LAUNCH
         self.session.set_stop_all_clips_button(ButtonElement(is_momentary, MIDI_CC_TYPE, CHANNEL, session_stopall_cc))
         for index in range(num_scenes):
-            self.session.scene(index).set_launch_button(ButtonElement(is_momentary, MIDI_CC_TYPE, CHANNEL, session_scenelaunch_cc[index]))
+            self.session.scene(index).set_launch_button(
+                ButtonElement(is_momentary, MIDI_CC_TYPE, CHANNEL, session_scenelaunch_cc[index]))
 
     def _set_modifiers_buttons(self):
         is_momentary = True
@@ -318,7 +334,7 @@ class NanoKontrolShift(ControlSurface):
 
         if (self._ctrl_button != None):
             self._ctrl_button.add_value_listener(self._ctrl_value)
-        #INIT NORMAL MODE
+        # INIT NORMAL MODE
         self._manage_modes(0)
 
     # MODIFIERS LISTENERS FUNCS ARE HERE
@@ -379,11 +395,12 @@ class NanoKontrolShift(ControlSurface):
 
     def _turn_off_matrix(self):
         for index in range(24):
-            self._send_midi(tuple([176,index+16,0]))
+            self._send_midi(tuple([176, index + 16, 0]))
 
     def disconnect(self):
         """clean things up on disconnect"""
-        self.log_message(time.strftime("%d.%m.%Y %H:%M:%S", time.localtime()) + "--------------= NanoKontrolShift log closed =--------------") #Create entry in log file
+        self.log_message(time.strftime("%d.%m.%Y %H:%M:%S",
+                                       time.localtime()) + "--------------= NanoKontrolShift log closed =--------------")  # Create entry in log file
         self._clear_controls()
         self.session = None
         self.mixer = None
