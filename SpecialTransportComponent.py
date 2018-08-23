@@ -22,8 +22,8 @@ import Live
 from _Framework.ButtonElement import ButtonElement
 from _Framework.TransportComponent import TransportComponent
 
-class SpecialTransportComponent(TransportComponent):
 
+class SpecialTransportComponent(TransportComponent):
     def __init__(self, parent):
         TransportComponent.__init__(self)
         self.__mainscript__ = parent
@@ -35,11 +35,9 @@ class SpecialTransportComponent(TransportComponent):
             if self.__mainscript__.song().clip_trigger_quantization is Live.Song.Quantization.values[index]:
                 self.quant_index = index
 
-
     def disconnect(self):
         TransportComponent.disconnect(self)
         return None
-
 
     def _set_tempo_buttons(self, tempo_down, tempo_up):
         if (tempo_down is not self.tempo_down_button):
@@ -54,7 +52,6 @@ class SpecialTransportComponent(TransportComponent):
             self.tempo_up_button = tempo_up
             if (self.tempo_up_button != None):
                 self.tempo_up_button.add_value_listener(self._tempo_up_value)
-
 
     def _tempo_down_value(self, value):
         assert isinstance(value, int)
@@ -74,8 +71,6 @@ class SpecialTransportComponent(TransportComponent):
                 self.tempo_up_button.turn_on()
             self.tempo_up_button.turn_off()
 
-
-
     def _set_quant_toggle_button(self, quant_button):
         if (self._quant_toggle_button is not quant_button):
             if self._quant_toggle_button != None:
@@ -84,23 +79,19 @@ class SpecialTransportComponent(TransportComponent):
             if self._quant_toggle_button != None:
                 self._quant_toggle_button.add_value_listener(self._quant_toggle_value)
 
-
     def _quant_toggle_value(self, value):
         if self._quant_toggle_button != None:
-            assert(value in range(128)) or AssertionError
+            assert (value in range(128)) or AssertionError
             if (value is 127):
                 self._quant_toggle_button.turn_on()
                 self.quant_index += 1
                 if self.quant_index < 13:
-                    if (Live.Song.Quantization.values[self.quant_index] == 6) or (Live.Song.Quantization.values[self.quant_index] == 8) or (Live.Song.Quantization.values[self.quant_index]== 10) or (Live.Song.Quantization.values[self.quant_index] == 12):
+                    if (Live.Song.Quantization.values[self.quant_index] == 6) or (
+                        Live.Song.Quantization.values[self.quant_index] == 8) or (
+                        Live.Song.Quantization.values[self.quant_index] == 10) or (
+                        Live.Song.Quantization.values[self.quant_index] == 12):
                         self.quant_index += 1
                 else:
                     self.quant_index = 0
             self.__mainscript__.song().clip_trigger_quantization = Live.Song.Quantization.values[self.quant_index]
             self._quant_toggle_button.turn_off()
-
-
-
-
-
-

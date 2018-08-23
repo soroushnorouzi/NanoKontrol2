@@ -1,14 +1,13 @@
 # emacs-mode: -*- python-*-
 # -*- coding: utf-8 -*-
-from consts import *
-from _Framework.ButtonElement import ButtonElement # Class representing a button a the controller
-from _Framework.ChannelStripComponent import * # Class attaching to the mixer of a given track
+from _Framework.ButtonElement import ButtonElement  # Class representing a button a the controller
+from _Framework.ChannelStripComponent import *  # Class attaching to the mixer of a given track
 from _Framework.EncoderElement import EncoderElement
-from _Framework.CompoundComponent import CompoundComponent # Base class for classes encompasing other components to form complex components
-from _Framework.InputControlElement import * # Base class for all classes representing control elements on a controller
-from _Framework.MixerComponent import MixerComponent # Class encompassing several channel strips to form a mixer
-from _Framework.SliderElement import SliderElement # Class representing a slider on the controller
+from _Framework.InputControlElement import *  # Base class for all classes representing control elements on a controller
+from _Framework.MixerComponent import MixerComponent  # Class encompassing several channel strips to form a mixer
+
 from SpecialChannelStripComponent import SpecialChannelStripComponent
+from consts import *
 
 
 class SpecialMixerComponent(MixerComponent):
@@ -24,11 +23,8 @@ class SpecialMixerComponent(MixerComponent):
         self.send_controls = []
         self.send_reset = []
 
-
     def tracks_to_use(self):
-        return (self.song().visible_tracks) #+ self.song().return_tracks)
-
-
+        return (self.song().visible_tracks)  # + self.song().return_tracks)
 
     def _create_strip(self):
         return SpecialChannelStripComponent()
@@ -47,7 +43,7 @@ class SpecialMixerComponent(MixerComponent):
         self.send_reset = []
         for button in buttons:
             if (button != None):
-                button.add_value_listener(self.reset_send, identify_sender = True)
+                button.add_value_listener(self.reset_send, identify_sender=True)
             self.send_reset.append(button)
 
     def reset_send(self, value, sender):
@@ -55,14 +51,15 @@ class SpecialMixerComponent(MixerComponent):
         assert (self.send_reset != None)
         assert isinstance(value, int)
         tracks = self.tracks_to_use()
-        #returns = self.returns_to_use()
+        # returns = self.returns_to_use()
         if ((value is not 0) or (not sender.is_momentary())):
-            if self.channel_strip(self.send_reset.index(sender))._send_controls[self.sends_index].mapped_parameter() != None:
-                self.channel_strip(self.send_reset.index(sender))._send_controls[self.sends_index].mapped_parameter().value = 0
+            if self.channel_strip(self.send_reset.index(sender))._send_controls[
+                self.sends_index].mapped_parameter() != None:
+                self.channel_strip(self.send_reset.index(sender))._send_controls[
+                    self.sends_index].mapped_parameter().value = 0
                 for i in range(20000):
                     self.send_reset[self.send_reset.index(sender)].turn_on()
                 self.send_reset[self.send_reset.index(sender)].turn_off()
-
 
     def _set_send_nav(self, send_up, send_down):
         # SET BUTTONS TO NAVIGATE THROUGH TRACKSENDS KNOBS
@@ -92,7 +89,6 @@ class SpecialMixerComponent(MixerComponent):
                 self.sends_index = new_sends_index
         self._update_send_index(self.sends_index)
 
-
     def _send_down_value(self, value):
         assert isinstance(value, int)
         assert isinstance(self.send_button_down, ButtonElement)
@@ -111,9 +107,9 @@ class SpecialMixerComponent(MixerComponent):
             strip = self.channel_strip(index)
             for i in range(12):
                 self.send_controls.append(None)
-            self.send_controls[sends_index] = EncoderElement(MIDI_CC_TYPE, CHANNEL, mixer_sendknob_cc[index], Live.MidiMap.MapMode.absolute)
+            self.send_controls[sends_index] = EncoderElement(MIDI_CC_TYPE, CHANNEL, mixer_sendknob_cc[index],
+                                                             Live.MidiMap.MapMode.absolute)
             strip.set_send_controls(tuple(self.send_controls))
-
 
 # local variables:
 # tab-width: 4

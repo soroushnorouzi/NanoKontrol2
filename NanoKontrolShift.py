@@ -1,35 +1,24 @@
 from __future__ import with_statement
-import Live
+
 import time  # We will be using time functions for time-stamping our log file outputs
+
+import Live
 
 """ We are only using using some of the Framework classes them in this script (the rest are not listed here) """
 
 from consts import *
 from _Framework.ButtonElement import ButtonElement  # Class representing a button a the controller
-from _Framework.ButtonMatrixElement import ButtonMatrixElement  # Class representing a button a the controller
 from _Framework.ChannelStripComponent import *  # Class attaching to the mixer of a given track
 from _Framework.EncoderElement import EncoderElement
-from _Framework.ClipSlotComponent import ClipSlotComponent  # Class representing a ClipSlot within Live
-from _Framework.CompoundComponent import \
-    CompoundComponent  # Base class for classes encompasing other components to form complex components
-from _Framework.ControlElement import \
-    ControlElement  # Base class for all classes representing control elements on a controller
 from _Framework.ControlSurface import ControlSurface  # Central base class for scripts based on the new Framework
-from _Framework.ControlSurfaceComponent import \
-    ControlSurfaceComponent  # Base class for all classes encapsulating functions in Live
 from _Framework.InputControlElement import *  # Base class for all classes representing control elements on a controller
-from _Framework.MixerComponent import MixerComponent  # Class encompassing several channel strips to form a mixer
-from _Framework.SceneComponent import SceneComponent  # Class representing a scene in Live
 from _Framework.SessionComponent import \
     SessionComponent  # Class encompassing several scene to cover a defined section of Live's session
 from _Framework.SliderElement import SliderElement  # Class representing a slider on the controller
-from _Framework.TransportComponent import \
-    TransportComponent  # Class encapsulating all functions in Live's transport section
 from _Framework.DeviceComponent import DeviceComponent
 
 # SpecialMixerComponent and SpecialChannelStripComponent to get acess to the unfold function
 from SpecialMixerComponent import SpecialMixerComponent
-from SpecialChannelStripComponent import *
 # Get access to view clip/device controls
 from ViewTogglerComponent import ViewTogglerComponent
 # Get access to tempo up/down buttons
@@ -71,7 +60,7 @@ class NanoKontrolShift(ControlSurface):
             # SET INITIAL SESSION/MIXER AND MODIFIERS BUTTONS
             self._set_modifiers_buttons()
             self.__update_matrix()
-            # self.set_highlighting_session_component(self.session)
+            self.set_highlighting_session_component(self.session)
 
             for component in self.components:
                 component.set_enabled(True)
